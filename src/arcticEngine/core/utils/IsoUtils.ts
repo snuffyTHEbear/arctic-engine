@@ -20,10 +20,10 @@ export class IsoUtils
 	static screenToIso(x: number, y: number): { row: number, col: number }
 	{
 		const adjX: number = x - this.START_X;
-		const adjY: number = y - this.START_Y;
+		const adjY: number = y - this.START_Y + 15;
 
 		const col: number = Math.floor((adjY / this.TILE_H) + (adjX / this.TILE_W));
-		const row: number = Math.floor((adjY / this.TILE_H) + (adjX / this.TILE_W));
+		const row: number = Math.floor((adjY / this.TILE_H) - (adjX / this.TILE_W));
 
 		return {row, col};
 	}
