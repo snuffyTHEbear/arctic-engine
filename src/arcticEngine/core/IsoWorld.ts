@@ -17,6 +17,11 @@ export class IsoWorld extends Container
 		return this._cols;
 	}
 
+	public get blocks(): Block[]
+	{
+		return this._blocks;
+	}
+
 	constructor(rows: number, cols: number)
 	{
 		super();

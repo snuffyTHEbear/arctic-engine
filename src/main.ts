@@ -2,6 +2,7 @@ import {Application, Graphics} from "pixi.js";
 import {IsoWorld} from "./arcticEngine/core/IsoWorld.ts";
 import {IsoUtils} from "./arcticEngine/core/utils/IsoUtils.ts";
 import {DebugPanel} from "./arcticEngine/core/utils/DebugPanel.ts";
+import type {Block} from "./arcticEngine/core/Block.ts";
 
 const app: Application = new Application();
 await app.init({width: 1200, height: 800, backgroundColor: 0x333333});
@@ -27,14 +28,20 @@ let currentRow: number = 0;
 let currentCol: number = 0;
 let prevBlock: Block;
 
+let yVal: number = 0;
+let yAngle: number = 0;
+let yRange: number = 50;
+let ySpeed: number = .012;
+
 app.ticker.add((): void =>
 {
-	return;
+	yVal = (Math.sin(yAngle) * yRange) + yRange;
+
 	const mouse = app.renderer.events.pointer;
 
 	const gridPos: { row: number, col: number } = IsoUtils.screenToIso(mouse.global.x, mouse.global.y);
 	const {row, col} = gridPos;
-
+	/*
 	if (currentCol == world.rows)
 	{
 		currentCol = 0;
@@ -52,21 +59,37 @@ app.ticker.add((): void =>
 	// currentRow = currentCol = 0;
 	debugPanel.log("Row", currentRow);
 	debugPanel.log("Col", currentCol);
+	*/
 
+	for (let i: number = world.blocks.length; i > 2; i--)
+	{
+		let b: Block = world.blocks[i - 1];
+		b.zHeight = world.blocks[i - 2].zHeight;
+	}
+	world.blocks[1].zHeight = world.blocks[0].zHeight;
+	world.blocks[0].zHeight = yVal;
 	const hoveredBlock = world.getBlock(currentRow, currentCol);
 	debugPanel.log("Grid Pos", `${gridPos.row} : ${gridPos.col}`);
 	debugPanel.log("Mouse Pos", `${mouse.global.x} : ${mouse.global.y}`);
-	if (prevBlock)
-	{
-		prevBlock.zHeight = 0;
-	}
-	if (hoveredBlock)
-	{
-		hoveredBlock.zHeight = 10;
-		cursor.x = hoveredBlock.x;
-		cursor.y = hoveredBlock.y;
-		prevBlock = hoveredBlock;
-	}
+	// if (prevBlock)
+	// {
+	// 	prevBlock.zHeight = 0;
+	// }
+	// if (hoveredBlock)
+	// {
+	// 	if (prevBlock)
+	// 	{
+	// 		prevBlock.zHeight = yVal;
+	// 		hoveredBlock.zHeight = prevBlock.zHeight;
+	// 	}
+	// 	else
+	// 	{
+	//
+	// 	}
+	// 	//cursor.x = hoveredBlock.x;
+	// 	//cursor.y = hoveredBlock.y;
+	// 	prevBlock = hoveredBlock;
+	//}
 
 	// if (hoveredBlock)
 	// {
@@ -82,5 +105,5 @@ app.ticker.add((): void =>
 	// }
 
 	world.redraw();
-
+	yAngle += ySpeed;
 });
