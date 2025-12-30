@@ -39,10 +39,11 @@ export class IsoWorld extends Container
 		{
 			for (let col: number = 0; col < this._cols; col++)
 			{
-				let height = 0;
-				//if (Math.random() > 0.8) height = 40;
+				let height = 27;
+				//if (Math.random() > 0.8) height = 60;
 
 				const block = new Block(row, col, height);
+				//block.waveOffset = row + (height * this._cols);
 				this.addChild(block);
 				this._blocks.push(block);
 			}

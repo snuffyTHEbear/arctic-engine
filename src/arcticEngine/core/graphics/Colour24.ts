@@ -50,6 +50,11 @@ export class Colour24
 		return this._baseColour;
 	}
 
+	public set baseColour(value: number)
+	{
+		this._baseColour = value;
+	}
+
 	/**
 	 * Specifies the raw value representing blue of the colour
 	 */

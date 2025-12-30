@@ -3,12 +3,13 @@ import {IsoWorld} from "./arcticEngine/core/IsoWorld.ts";
 import {IsoUtils} from "./arcticEngine/core/utils/IsoUtils.ts";
 import {DebugPanel} from "./arcticEngine/core/utils/DebugPanel.ts";
 import type {Block} from "./arcticEngine/core/Block.ts";
+import {Colour24} from "./arcticEngine/core/graphics/Colour24.ts";
 
 const app: Application = new Application();
 await app.init({width: 1200, height: 800, backgroundColor: 0x333333});
 document.body.appendChild(app.canvas);
 
-const world: IsoWorld = new IsoWorld(15, 15);
+const world: IsoWorld = new IsoWorld(18, 18);
 app.stage.addChild(world);
 
 const debugPanel = new DebugPanel();
@@ -24,86 +25,88 @@ app.stage.addChild(cursor);
 app.stage.eventMode = 'static';
 app.stage.hitArea = app.screen;
 
-let currentRow: number = 0;
-let currentCol: number = 0;
-let prevBlock: Block;
-
-let yVal: number = 0;
 let yAngle: number = 0;
-let yRange: number = 50;
-let ySpeed: number = .012;
+let yRange: number = 60;
+let ySpeed: number = (Math.PI * 2) / 360;
+
+//Create aray of yVals loop till the value matches the first value and use these rather than calculate in main loop
+let yVals: number[] = [];
+let normalizedVals: number[] = [];
+//let wavelengths: number[] = [];
+let ind: number = 0;
+
+const colourTop: Colour24 = new Colour24(IsoUtils.PastelPalette.TeaGreen);
+const colourBot: Colour24 = new Colour24(IsoUtils.PastelPalette.Orange);
+
+createYVals();
+
+function createYVals(): void
+{
+	const steps: number = Math.ceil((Math.PI * 2) / ySpeed);
+	for (let i = 0; i < steps; i++)
+	{
+		yAngle = i * ySpeed;
+		let yVal: number = (Math.sin(yAngle) * yRange) + yRange;
+		normalizedVals.push(normalize(yVal, 0, 27))
+		yVals.push(yVal);
+	}
+	const wavelength: number = 18;
+	world.blocks.forEach((block: Block): void =>
+	{
+		// Left to Right	b.x * spacing
+		// Front to Back	b.z * spacing
+		// Diagonal	(b.x + b.z) * spacing
+		// Circular (Ripple)	Math.sqrt(b.x*b.x + b.z*b.z) * spacing
+		block.waveOffset = Math.floor((Math.sqrt(block.gridRow * block.gridRow + block.gridCol * block.gridCol)) * wavelength);
+	})
+}
 
 app.ticker.add((): void =>
 {
-	yVal = (Math.sin(yAngle) * yRange) + yRange;
+	ind = (ind + 1) % yVals.length;
+	debugPanel.log("Y Vals", yVals.length);
 
-	const mouse = app.renderer.events.pointer;
+	//yVal = (Math.sin(yAngle) * yRange) + yRange;
 
-	const gridPos: { row: number, col: number } = IsoUtils.screenToIso(mouse.global.x, mouse.global.y);
-	const {row, col} = gridPos;
-	/*
-	if (currentCol == world.rows)
-	{
-		currentCol = 0;
-		currentRow += 1;
-	}
-	else if (currentRow == world.rows)
-	{
-		currentCol = 0;
-		currentRow = 0;
-	}
-	else
-	{
-		currentCol++;
-	}
-	// currentRow = currentCol = 0;
-	debugPanel.log("Row", currentRow);
-	debugPanel.log("Col", currentCol);
-	*/
+	//const mouse = app.renderer.events.pointer;
 
-	for (let i: number = world.blocks.length; i > 2; i--)
-	{
-		let b: Block = world.blocks[i - 1];
-		b.zHeight = world.blocks[i - 2].zHeight;
-	}
-	world.blocks[1].zHeight = world.blocks[0].zHeight;
-	world.blocks[0].zHeight = yVal;
-	const hoveredBlock = world.getBlock(currentRow, currentCol);
-	debugPanel.log("Grid Pos", `${gridPos.row} : ${gridPos.col}`);
-	debugPanel.log("Mouse Pos", `${mouse.global.x} : ${mouse.global.y}`);
-	// if (prevBlock)
-	// {
-	// 	prevBlock.zHeight = 0;
-	// }
-	// if (hoveredBlock)
-	// {
-	// 	if (prevBlock)
-	// 	{
-	// 		prevBlock.zHeight = yVal;
-	// 		hoveredBlock.zHeight = prevBlock.zHeight;
-	// 	}
-	// 	else
-	// 	{
-	//
-	// 	}
-	// 	//cursor.x = hoveredBlock.x;
-	// 	//cursor.y = hoveredBlock.y;
-	// 	prevBlock = hoveredBlock;
-	//}
+	//const gridPos: { row: number, col: number } = IsoUtils.screenToIso(mouse.global.x, mouse.global.y);
+	//const {row, col} = gridPos;
 
-	// if (hoveredBlock)
-	// {
-	// 	cursor.visible = true;
-	//
-	// 	const screenPos: { x: number, y: number } = IsoUtils.isoToScreen(row, col);
-	// 	cursor.x = screenPos.x;
-	// 	cursor.y = screenPos.y - hoveredBlock.zHeight;
-	// }
-	// else
-	// {
-	// 	cursor.visible = false;
-	// }
+	world.blocks.forEach((block: Block): void =>
+	{
+		let frame: number = (ind + block.waveOffset) % yVals.length;
+		block.zHeight = yVals[frame];
+		block.colour = lerpColour(colourTop, colourBot, normalizedVals[frame]).colour;
+	})
+
+	//debugPanel.log("Grid Pos", `${gridPos.row} : ${gridPos.col}`);
+	//debugPanel.log("Mouse Pos", `${mouse.global.x} : ${mouse.global.y}`);
 
 	world.redraw();
-	yAngle += ySpeed;
+
+
 });
+
+function normalize(height: number, minHeight: number, maxHeight: number): number
+{
+	let t: number = ((height - minHeight) / (maxHeight - minHeight));
+	return t;
+}
+
+function lerpColour(colourA: Colour24, colourB: Colour24, t: number): Colour24
+{
+	const r: number = Math.floor(lerp(colourA.red, colourB.red, t));
+	const g: number = Math.floor(lerp(colourA.green, colourB.green, t));
+	const b: number = Math.floor(lerp(colourA.blue, colourB.blue, t));
+	let c: Colour24 = new Colour24(0);
+	c.red = r;
+	c.green = g;
+	c.blue = b;
+	return c;
+}
+
+function lerp(x: number, y: number, a: number): number
+{
+	return x + (y - x) * a;
+}

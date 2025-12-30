@@ -9,8 +9,9 @@ export class Block extends Container
 	public zHeight: number;
 
 	private _colour: Colour24;
-
 	private _graphics: Graphics;
+
+	private _waveOffset: number = 0;
 
 	constructor(row: number, col: number, z: number = 0, colour: number = 0xFFB6C1)
 	{
@@ -34,7 +35,18 @@ export class Block extends Container
 
 	public set colour(c: number)
 	{
+		this._colour.baseColour = c;
 		this._colour.colour = c;
+	}
+
+	public get waveOffset(): number
+	{
+		return this._waveOffset;
+	}
+
+	public set waveOffset(n: number)
+	{
+		this._waveOffset = n;
 	}
 
 	public redraw(): void
