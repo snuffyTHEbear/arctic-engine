@@ -7,6 +7,16 @@ export class IsoWorld extends Container
 	private readonly _rows: number;
 	private readonly _cols: number;
 
+	public get rows(): number
+	{
+		return this._rows;
+	}
+
+	public get cols(): number
+	{
+		return this._cols;
+	}
+
 	constructor(rows: number, cols: number)
 	{
 		super();
@@ -25,12 +35,21 @@ export class IsoWorld extends Container
 			for (let col: number = 0; col < this._cols; col++)
 			{
 				let height = 0;
-				if (Math.random() > 0.8) height = 40;
+				//if (Math.random() > 0.8) height = 40;
 
 				const block = new Block(row, col, height);
 				this.addChild(block);
 				this._blocks.push(block);
 			}
+		}
+	}
+
+	public redraw(): void
+	{
+		for (let j: number = 0; j < this._blocks.length; j++)
+		{
+			let b: Block = this._blocks[j];
+			b.redraw();
 		}
 	}
 

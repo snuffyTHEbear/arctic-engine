@@ -2,8 +2,8 @@ export class IsoUtils
 {
 	static readonly TILE_W: number = 64;
 	static readonly TILE_H: number = 32;
-	static readonly START_X: number = 400;
-	static readonly START_Y: number = 100;
+	static readonly START_X: number = 600;
+	static readonly START_Y: number = 200;
 
 	/**
 	 * Converts Grid (row, col) to Screen coordinates (x, y)
