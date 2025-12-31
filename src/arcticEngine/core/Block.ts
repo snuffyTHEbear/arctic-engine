@@ -1,4 +1,4 @@
-import {Container, Graphics} from "pixi.js";
+import {Container, Graphics, Ticker} from "pixi.js";
 import {IsoUtils} from "./utils/IsoUtils.ts";
 import {Colour24} from "./graphics/Colour24.ts";
 
@@ -9,11 +9,16 @@ export class Block extends Container
 	public zHeight: number;
 
 	private _colour: Colour24;
-	private _graphics: Graphics;
+	private readonly _graphics: Graphics;
 
 	private _waveOffset: number = 0;
 
-	constructor(row: number, col: number, z: number = 0, colour: number = 0xFFB6C1)
+	private _targetX: number = 0;
+	private _targetY: number = 0;
+
+	private _speed: number = 0.15;
+
+	constructor(row: number, col: number, z: number = 0, colour: number = 0xFFB6C1, ticker: boolean = false)
 	{
 		super();
 
@@ -23,14 +28,15 @@ export class Block extends Container
 		this._colour = new Colour24(colour);
 
 		const pos = IsoUtils.isoToScreen(row, col);
-		this.x = pos.x;
-		this.y = pos.y;
+		this.x = this._targetX = pos.x;
+		this.y = this._targetY = pos.y;
 
 		this.zIndex = row + col;
 
 		this._graphics = new Graphics();
 		this.addChild(this._graphics);
 		this.redraw();
+		ticker ? Ticker.shared.add(this.update, this) : null;
 	}
 
 	public set colour(c: number)
@@ -48,6 +54,37 @@ export class Block extends Container
 	{
 		this._waveOffset = n;
 	}
+
+	public moveTo(newRow: number, newCol: number, liftHeight: number = 0): void
+	{
+		this.gridRow = newRow;
+		this.gridCol = newCol;
+
+		const pos: { x: number, y: number } = IsoUtils.isoToScreen(newRow, newCol);
+		this._targetX = pos.x;
+		this._targetY = pos.y - liftHeight;
+
+		this.zIndex = newRow + newCol + 1;
+	}
+
+	private update(ticker: Ticker): void
+	{
+		console.log("Block update");
+		const dx: number = this._targetX - this.x;
+		const dy: number = this._targetY - this.y;
+
+		if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5)
+		{
+			this.x += dx * this._speed;
+			this.y += dy * this._speed;
+		}
+		else
+		{
+			this.x = this._targetX;
+			this.y = this._targetY;
+		}
+	}
+
 
 	public redraw(): void
 	{

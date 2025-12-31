@@ -39,7 +39,7 @@ export class IsoWorld extends Container
 		{
 			for (let col: number = 0; col < this._cols; col++)
 			{
-				let height = 27;
+				let height = 0;
 				//if (Math.random() > 0.8) height = 60;
 
 				const block = new Block(row, col, height);
@@ -62,5 +62,11 @@ export class IsoWorld extends Container
 	public getBlock(row: number, col: number): Block | null
 	{
 		return this._blocks.find(b => b.gridRow === row && b.gridCol === col) || null;
+	}
+
+	public isValid(row: number, col: number): boolean
+	{
+		return !(row < 0 || row >= this.rows || col < 0 || col >= this.cols);
+
 	}
 }
