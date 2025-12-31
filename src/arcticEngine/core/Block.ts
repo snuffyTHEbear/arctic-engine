@@ -31,11 +31,12 @@ export class Block extends Container
 		this.x = this._targetX = pos.x;
 		this.y = this._targetY = pos.y;
 
-		this.zIndex = row + col;
-
 		this._graphics = new Graphics();
 		this.addChild(this._graphics);
 		this.redraw();
+
+		this.zIndex = this.y;
+
 		ticker ? Ticker.shared.add(this.update, this) : null;
 	}
 
@@ -64,12 +65,12 @@ export class Block extends Container
 		this._targetX = pos.x;
 		this._targetY = pos.y - liftHeight;
 
-		this.zIndex = newRow + newCol + 1;
+		//this.zIndex = newRow + newCol + 1;
+		this.zIndex = pos.y - liftHeight;
 	}
 
 	private update(ticker: Ticker): void
 	{
-		console.log("Block update");
 		const dx: number = this._targetX - this.x;
 		const dy: number = this._targetY - this.y;
 
@@ -77,14 +78,17 @@ export class Block extends Container
 		{
 			this.x += dx * this._speed;
 			this.y += dy * this._speed;
+			this.zIndex = this.y;
 		}
 		else
 		{
 			this.x = this._targetX;
 			this.y = this._targetY;
+			this.zIndex = this.y;
 		}
-	}
+		this.zIndex = this.y + 1;
 
+	}
 
 	public redraw(): void
 	{

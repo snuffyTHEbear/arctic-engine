@@ -13,6 +13,7 @@ export class Movement implements IScene
 	private world: IsoWorld;
 	private player: Block;
 	private debugPanel: DebugPanel;
+	private lastKey: String;
 
 	constructor()
 	{
@@ -21,6 +22,7 @@ export class Movement implements IScene
 		this.player = new Block(0, 0, 25, IsoUtils.PastelPalette.Green, true);
 		this.debugPanel = new DebugPanel();
 		this.debugPanel.position.set(10, 10);
+		this.lastKey = '';
 	}
 
 	public init(app: Application): void
@@ -34,9 +36,10 @@ export class Movement implements IScene
 		window.addEventListener("keydown", (ev) =>
 		{
 			console.log(this);
+
 			let nextRow: number = this.player.gridRow;
 			let nextCol: number = this.player.gridCol;
-
+			this.lastKey = ev.code;
 			switch (ev.code)
 			{
 				case "ArrowUp":
@@ -72,7 +75,7 @@ export class Movement implements IScene
 	public update(): void
 	{
 		this.world.redraw();
-		this.debugPanel.log("Last Key", 5);
+		this.debugPanel.log("Last Key", this.lastKey);
 	}
 
 	public cleanup(): void

@@ -22,6 +22,12 @@ export class IsoWorld extends Container
 		return this._blocks;
 	}
 
+	public addBlock(block: Block): void
+	{
+		console.log("Block added in " + block.colour);
+		this._blocks.push(block);
+	}
+
 	constructor(rows: number, cols: number)
 	{
 		super();
@@ -40,7 +46,7 @@ export class IsoWorld extends Container
 			for (let col: number = 0; col < this._cols; col++)
 			{
 				let height = 0;
-				//if (Math.random() > 0.8) height = 60;
+				//if (Math.random() > 0.8 && row != 0 && col != 0) height = 60;
 
 				const block = new Block(row, col, height);
 				//block.waveOffset = row + (height * this._cols);
@@ -52,11 +58,15 @@ export class IsoWorld extends Container
 
 	public redraw(): void
 	{
-		for (let j: number = 0; j < this._blocks.length; j++)
+		this._blocks.forEach((block: Block): void =>
 		{
-			let b: Block = this._blocks[j];
-			b.redraw();
-		}
+			block.redraw();
+		})
+		// for (let j: number = 0; j < this._blocks.length; j++)
+		// {
+		// 	let b: Block = this._blocks[j];
+		// 	b.redraw();
+		// }
 	}
 
 	public getBlock(row: number, col: number): Block | null
